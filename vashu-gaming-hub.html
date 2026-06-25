@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vashu Gaming Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* ───────────────────────────────────────────
+       RESET & BASE
+    ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --neon-cyan:    #00f5ff;
+      --neon-pink:    #ff006e;
+      --neon-purple:  #9b00ff;
+      --neon-green:   #39ff14;
+      --bg-dark:      #020208;
+      --bg-card:      #0d0d1a;
+      --bg-card2:     #0a0a18;
+      --text-main:    #e8e8ff;
+      --text-muted:   #7a7a9e;
+      --glow-cyan:    0 0 8px #00f5ff, 0 0 20px #00f5ff55, 0 0 40px #00f5ff22;
+      --glow-pink:    0 0 8px #ff006e, 0 0 20px #ff006e55, 0 0 40px #ff006e22;
+      --glow-purple:  0 0 8px #9b00ff, 0 0 20px #9b00ff55, 0 0 40px #9b00ff22;
+      --border-glow:  1px solid rgba(0, 245, 255, 0.15);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ───────────────────────────────────────────
+       ANIMATED BACKGROUND CANVAS
+    ─────────────────────────────────────────── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ───────────────────────────────────────────
+       SCROLLBAR
+    ─────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #05050f; }
+    ::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 3px; }
+
+    /* ───────────────────────────────────────────
+       NAVIGATION
+    ─────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      background: rgba(2, 2, 8, 0.75);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(0, 245, 255, 0.12);
+      transition: background 0.3s;
+    }
+
+    nav.scrolled { background: rgba(2, 2, 8, 0.95); }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      filter: drop-shadow(0 0 8px rgba(0,245,255,0.6));
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color 0.25s, text-shadow 0.25s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      transition: width 0.3s;
+      border-radius: 2px;
+    }
+
+    .nav-links a:hover { color: var(--neon-cyan); text-shadow: var(--glow-cyan); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 1100;
+    }
+    .hamburger span {
+      width: 26px; height: 2px;
+      background: var(--neon-cyan);
+      border-radius: 2px;
+      transition: 0.3s;
+      box-shadow: var(--glow-cyan);
+    }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 70px;
+      left: 0;
+      width: 100%;
+      background: rgba(2, 2, 8, 0.97);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,245,255,0.15);
+      padding: 1.5rem 2rem;
+      z-index: 999;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: color 0.2s;
+    }
+    .mobile-menu a:hover { color: var(--neon-cyan); }
+
+    /* ───────────────────────────────────────────
+       HERO
+    ─────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 2rem 4rem;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1.2rem;
+      border-radius: 30px;
+      border: 1px solid rgba(0,245,255,0.35);
+      background: rgba(0,245,255,0.07);
+      color: var(--neon-cyan);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      animation: pulse-badge 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { box-shadow: 0 0 10px rgba(0,245,255,0.2); }
+      50%       { box-shadow: 0 0 22px rgba(0,245,255,0.5); }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 7vw, 6rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -1px;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 .line1 {
+      display: block;
+      color: #fff;
+      text-shadow: 0 0 30px rgba(255,255,255,0.25);
+    }
+
+    .hero h1 .line2 {
+      display: block;
+      background: linear-gradient(90deg, var(--neon-cyan) 0%, var(--neon-pink) 50%, var(--neon-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(0,245,255,0.45));
+      animation: gradient-shift 4s ease-in-out infinite alternate;
+      background-size: 200% 200%;
+    }
+    @keyframes gradient-shift {
+      0%   { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .hero-desc {
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2.2rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      color: #000;
+      box-shadow: 0 0 20px rgba(0,245,255,0.45), 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 0 35px rgba(0,245,255,0.7), 0 8px 30px rgba(0,0,0,0.5);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--neon-pink);
+      border: 1px solid var(--neon-pink);
+      box-shadow: 0 0 12px rgba(255,0,110,0.25);
+    }
+    .btn-outline:hover {
+      background: rgba(255,0,110,0.1);
+      transform: translateY(-3px);
+      box-shadow: 0 0 28px rgba(255,0,110,0.55);
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    .scroll-indicator i { font-size: 1.1rem; color: var(--neon-cyan); }
+    @keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0);} 50%{transform:translateX(-50%) translateY(8px);} }
+
+    /* Stats row */
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 3.5rem;
+      padding-top: 3rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .stat { text-align: center; }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+
+    /* ───────────────────────────────────────────
+       SECTION SHARED
+    ─────────────────────────────────────────── */
+    section { position: relative; z-index: 1; padding: 5rem 2rem; }
+
+    .section-header { text-align: center; margin-bottom: 3.5rem; }
+    .section-tag {
+      display: inline-block;
+      padding: 0.3rem 1rem;
+      border-radius: 20px;
+      background: rgba(155,0,255,0.12);
+      border: 1px solid rgba(155,0,255,0.35);
+      color: var(--neon-purple);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .section-title span {
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .section-sub { color: var(--text-muted); margin-top: 0.75rem; font-size: 1rem; }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* ───────────────────────────────────────────
+       FEATURED GAMES
+    ─────────────────────────────────────────── */
+    #games { background: rgba(0,0,0,0.3); }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.8rem;
+    }
+
+    .game-card {
+      background: var(--bg-card);
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.35s cubic-bezier(0.25,0.8,0.25,1), box-shadow 0.35s;
+      group: true;
+    }
+
+    .game-card:hover {
+      transform: translateY(-10px) scale(1.02);
+    }
+
+    .game-card.mc:hover  { box-shadow: 0 20px 50px rgba(57,255,20,0.3),  0 0 0 1px rgba(57,255,20,0.25); }
+    .game-card.gta:hover { box-shadow: 0 20px 50px rgba(255,165,0,0.3),  0 0 0 1px rgba(255,165,0,0.25); }
+    .game-card.val:hover { box-shadow: 0 20px 50px rgba(255,70,70,0.35), 0 0 0 1px rgba(255,70,70,0.25); }
+    .game-card.ff:hover  { box-shadow: 0 20px 50px rgba(255,140,0,0.3),  0 0 0 1px rgba(255,140,0,0.25); }
+
+    .game-thumb {
+      position: relative;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .game-thumb-bg {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      transition: transform 0.4s ease;
+    }
+    .game-card:hover .game-thumb-bg { transform: scale(1.1); }
+
+    /* per-game gradients */
+    .mc  .game-thumb-bg { background: linear-gradient(135deg, #1a3a1a, #2d5a2d, #1a4a1a); }
+    .gta .game-thumb-bg { background: linear-gradient(135deg, #1a1a2e, #2d1a3a, #3a1a1a); }
+    .val .game-thumb-bg { background: linear-gradient(135deg, #3a0a0a, #5a1010, #2a0505); }
+    .ff  .game-thumb-bg { background: linear-gradient(135deg, #2a1a00, #4a2e00, #3a2000); }
+
+    .game-thumb-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, var(--bg-card) 0%, transparent 60%);
+    }
+
+    .game-rating {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 20px;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      backdrop-filter: blur(6px);
+    }
+    .game-rating i { color: #ffd700; }
+
+    .game-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .badge-hot   { background: var(--neon-pink); color: #fff; box-shadow: 0 0 12px rgba(255,0,110,0.6); }
+    .badge-new   { background: var(--neon-green); color: #000; box-shadow: 0 0 12px rgba(57,255,20,0.6); }
+    .badge-top   { background: var(--neon-cyan);  color: #000; box-shadow: 0 0 12px rgba(0,245,255,0.6); }
+    .badge-free  { background: var(--neon-purple); color: #fff; box-shadow: 0 0 12px rgba(155,0,255,0.6); }
+
+    .game-info { padding: 1.4rem; }
+    .game-genre {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+    .mc  .game-genre { color: var(--neon-green); }
+    .gta .game-genre { color: #ff8c00; }
+    .val .game-genre { color: #ff4646; }
+    .ff  .game-genre { color: #ffb700; }
+
+    .game-title {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.3px;
+    }
+
+    .game-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.2rem; }
+
+    .game-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.1rem;
+    }
+    .game-players { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem; }
+    .game-players i { color: var(--neon-cyan); }
+
+    .game-price { font-size: 1rem; font-weight: 800; }
+    .price-free { color: var(--neon-green); text-shadow: 0 0 8px rgba(57,255,20,0.5); }
+
+    .btn-game {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-game:hover { opacity: 0.9; transform: scale(1.02); }
+
+    .mc  .btn-game { background: linear-gradient(90deg, #39ff14, #1a9900); color: #000; box-shadow: 0 0 16px rgba(57,255,20,0.4); }
+    .gta .btn-game { background: linear-gradient(90deg, #ff8c00, #cc5500); color: #fff; box-shadow: 0 0 16px rgba(255,140,0,0.4); }
+    .val .btn-game { background: linear-gradient(90deg, #ff4646, #aa0000); color: #fff; box-shadow: 0 0 16px rgba(255,70,70,0.4); }
+    .ff  .btn-game { background: linear-gradient(90deg, #ffb700, #cc7700); color: #000; box-shadow: 0 0 16px rgba(255,183,0,0.4); }
+
+    /* ───────────────────────────────────────────
+       NEWS SECTION
+    ─────────────────────────────────────────── */
+    #news { background: rgba(0,0,0,0.15); }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) { .news-grid { grid-template-columns: 1fr; } }
+
+    .news-featured {
+      background: var(--bg-card);
+      border-radius: 14px;
+      overflow: hidden;
+      border: var(--border-glow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+    }
+    .news-featured:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0,245,255,0.15);
+    }
+
+    .news-featured-img {
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      background: linear-gradient(135deg, #050510, #0d0d30, #050520);
+      position: relative;
+      overflow: hidden;
+    }
+    .news-featured-img::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(0,245,255,0.12) 0%, transparent 70%);
+    }
+
+    .news-featured-content { padding: 1.5rem; }
+    .news-tag {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      background: rgba(0,245,255,0.12);
+      color: var(--neon-cyan);
+      border: 1px solid rgba(0,245,255,0.3);
+    }
+    .news-featured-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      margin-bottom: 0.75rem;
+      line-height: 1.3;
+    }
+    .news-featured-excerpt { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1.2rem; }
+    .news-meta {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .news-meta i { color: var(--neon-cyan); }
+
+    .news-sidebar { display: flex; flex-direction: column; gap: 1rem; }
+    .news-card {
+      background: var(--bg-card);
+      border-radius: 10px;
+      border: var(--border-glow);
+      padding: 1rem 1.1rem;
+      cursor: pointer;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .news-card:hover {
+      transform: translateX(4px);
+      border-color: rgba(0,245,255,0.4);
+      box-shadow: 0 4px 24px rgba(0,245,255,0.08);
+    }
+    .news-card-icon {
+      font-size: 2rem;
+      min-width: 44px;
+      text-align: center;
+      margin-top: 2px;
+    }
+    .news-card-body {}
+    .news-card-tag { font-size: 0.68rem; color: var(--neon-pink); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.3rem; }
+    .news-card-title { font-size: 0.92rem; font-weight: 700; line-height: 1.4; margin-bottom: 0.3rem; }
+    .news-card-date { font-size: 0.72rem; color: var(--text-muted); }
+
+    /* ───────────────────────────────────────────
+       REVIEWS SECTION
+    ─────────────────────────────────────────── */
+    #reviews { background: rgba(0,0,0,0.3); }
+
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .review-card {
+      background: var(--bg-card);
+      border-radius: 14px;
+      padding: 1.8rem;
+      border: var(--border-glow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .review-card::before {
+      content: '"';
+      position: absolute;
+      top: -20px;
+      right: 20px;
+      font-size: 8rem;
+      color: rgba(0,245,255,0.05);
+      font-family: Georgia, serif;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .review-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 40px rgba(0,245,255,0.12);
+      border-color: rgba(0,245,255,0.3);
+    }
+
+    .review-stars { display: flex; gap: 3px; margin-bottom: 1rem; }
+    .review-stars i { color: #ffd700; font-size: 0.95rem; }
+
+    .review-text { font-size: 0.9rem; color: #c0c0d8; line-height: 1.7; margin-bottom: 1.3rem; }
+
+    .review-author { display: flex; align-items: center; gap: 0.9rem; }
+    .review-avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem;
+      border: 2px solid rgba(0,245,255,0.3);
+    }
+    .review-name { font-weight: 700; font-size: 0.9rem; }
+    .review-handle { font-size: 0.75rem; color: var(--neon-cyan); }
+
+    /* ───────────────────────────────────────────
+       CONTACT
+    ─────────────────────────────────────────── */
+    #contact { background: rgba(0,0,0,0.15); }
+
+    .contact-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+    @media (max-width: 768px) { .contact-wrapper { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+    .contact-info h3 { font-size: 2rem; font-weight: 900; margin-bottom: 1rem; }
+    .contact-info p { color: var(--text-muted); line-height: 1.7; margin-bottom: 2rem; }
+    .contact-items { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      background: var(--bg-card);
+      border-radius: 10px;
+      border: var(--border-glow);
+    }
+    .contact-item-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: rgba(0,245,255,0.1);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--neon-cyan);
+      font-size: 1.1rem;
+    }
+    .contact-item-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+    .contact-item-value { font-size: 0.9rem; font-weight: 600; }
+
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+    .form-control {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 0.85rem 1.1rem;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      outline: none;
+      resize: none;
+    }
+    .form-control:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 16px rgba(0,245,255,0.2);
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* ───────────────────────────────────────────
+       FOOTER
+    ─────────────────────────────────────────── */
+    footer {
+      position: relative;
+      z-index: 1;
+      background: rgba(0,0,0,0.5);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 4rem 2rem 2rem;
+    }
+
+    .footer-grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 2.5rem;
+      margin-bottom: 3rem;
+    }
+    @media (max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 500px) { .footer-grid { grid-template-columns: 1fr; } }
+
+    .footer-brand {}
+    .footer-logo {
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+      margin-bottom: 1rem;
+    }
+    .footer-brand p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1.5rem; }
+
+    .social-icons { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .social-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+    }
+    .social-icon:hover { transform: translateY(-3px); }
+    .social-icon.tw:hover  { color: #1da1f2; border-color: #1da1f2; box-shadow: 0 0 16px rgba(29,161,242,0.4); }
+    .social-icon.dc:hover  { color: #7289da; border-color: #7289da; box-shadow: 0 0 16px rgba(114,137,218,0.4); }
+    .social-icon.yt:hover  { color: #ff0000; border-color: #ff0000; box-shadow: 0 0 16px rgba(255,0,0,0.4); }
+    .social-icon.tw2:hover { color: #9147ff; border-color: #9147ff; box-shadow: 0 0 16px rgba(145,71,255,0.4); }
+    .social-icon.ig:hover  { color: #e1306c; border-color: #e1306c; box-shadow: 0 0 16px rgba(225,48,108,0.4); }
+    .social-icon.tk:hover  { color: #00f2ea; border-color: #00f2ea; box-shadow: 0 0 16px rgba(0,242,234,0.4); }
+
+    .footer-col h4 {
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--neon-cyan);
+      margin-bottom: 1.2rem;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-col ul li a {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s, padding-left 0.2s;
+    }
+    .footer-col ul li a:hover { color: var(--text-main); padding-left: 4px; }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-bottom p { font-size: 0.8rem; color: var(--text-muted); }
+    .footer-bottom span { color: var(--neon-cyan); }
+
+    /* ───────────────────────────────────────────
+       TOAST NOTIFICATION
+    ─────────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--neon-cyan);
+      box-shadow: 0 0 24px rgba(0,245,255,0.3);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      font-weight: 600;
+      z-index: 9999;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ───────────────────────────────────────────
+       BACK TO TOP
+    ─────────────────────────────────────────── */
+    #back-to-top {
+      position: fixed;
+      bottom: 2rem;
+      left: 2rem;
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: rgba(0,245,255,0.1);
+      border: 1px solid rgba(0,245,255,0.35);
+      color: var(--neon-cyan);
+      font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s, box-shadow 0.3s;
+      z-index: 999;
+    }
+    #back-to-top.visible { opacity: 1; transform: translateY(0); }
+    #back-to-top:hover { box-shadow: 0 0 20px rgba(0,245,255,0.5); }
+
+    /* ───────────────────────────────────────────
+       DIVIDER GLOW
+    ─────────────────────────────────────────── */
+    .glow-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--neon-pink), var(--neon-purple), transparent);
+      opacity: 0.35;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ───────────────────────────────────────────
+       RESPONSIVE
+    ─────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .hero h1 { font-size: 2.6rem; }
+      .hero-stats { gap: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Animated background canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ─────────────── NAV ─────────────── -->
+<nav id="navbar">
+  <a class="nav-logo" href="#home">⚡ Vashu Gaming</a>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#games">Games</a></li>
+    <li><a href="#news">News</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#home" onclick="closeMobileMenu()">Home</a>
+  <a href="#games" onclick="closeMobileMenu()">Games</a>
+  <a href="#news" onclick="closeMobileMenu()">News</a>
+  <a href="#reviews" onclick="closeMobileMenu()">Reviews</a>
+  <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+</div>
+
+<!-- ─────────────── HERO ─────────────── -->
+<section class="hero" id="home">
+  <div class="hero-badge">
+    <i class="fas fa-circle-dot" style="font-size:0.55rem;"></i>
+    Live Now — Season 12 Active
+  </div>
+
+  <h1>
+    <span class="line1">Welcome to</span>
+    <span class="line2">Vashu Gaming Hub</span>
+  </h1>
+
+  <p class="hero-desc">
+    Your ultimate destination for the latest games, exclusive reviews, and gaming news.
+    Level up your experience — explore, play, and dominate.
+  </p>
+
+  <div class="hero-cta">
+    <a href="#games" class="btn btn-primary"><i class="fas fa-gamepad"></i> Explore Games</a>
+    <a href="#news" class="btn btn-outline"><i class="fas fa-newspaper"></i> Latest News</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-value" data-target="2400">0</div>
+      <div class="stat-label">Active Players</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" data-target="180">0</div>
+      <div class="stat-label">Games Listed</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" data-target="97">0</div>
+      <div class="stat-label">% Uptime</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" data-target="50">0</div>
+      <div class="stat-label">K+ Community</div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Scroll</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- ─────────────── GAMES ─────────────── -->
+<section id="games">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">🎮 Top Picks</div>
+      <h2 class="section-title">Featured <span>Games</span></h2>
+      <p class="section-sub">Hand-picked titles dominating the gaming world right now</p>
+    </div>
+
+    <div class="games-grid">
+
+      <!-- Minecraft -->
+      <div class="game-card mc" onclick="showToast('🟩 Minecraft – Opening game page...')">
+        <div class="game-thumb">
+          <div class="game-thumb-bg">⛏️</div>
+          <div class="game-thumb-overlay"></div>
+          <div class="game-badge badge-hot">Hot</div>
+          <div class="game-rating"><i class="fas fa-star"></i> 4.8</div>
+        </div>
+        <div class="game-info">
+          <div class="game-genre">Sandbox / Adventure</div>
+          <h3 class="game-title">Minecraft</h3>
+          <p class="game-desc">Build, survive, and explore infinite worlds. The most popular game of all time returns with fresh updates.</p>
+          <div class="game-meta">
+            <div class="game-players"><i class="fas fa-users"></i> 238M+ Players</div>
+            <div class="game-price">$26.95</div>
+          </div>
+          <button class="btn-game">Play Now</button>
+        </div>
+      </div>
+
+      <!-- GTA V -->
+      <div class="game-card gta" onclick="showToast('🚗 GTA V – Opening game page...')">
+        <div class="game-thumb">
+          <div class="game-thumb-bg">🚗</div>
+          <div class="game-thumb-overlay"></div>
+          <div class="game-badge badge-top">Top Rated</div>
+          <div class="game-rating"><i class="fas fa-star"></i> 4.9</div>
+        </div>
+        <div class="game-info">
+          <div class="game-genre">Open World / Action</div>
+          <h3 class="game-title">GTA V</h3>
+          <p class="game-desc">The definitive open-world crime experience. Los Santos awaits — pull off heists, rule the streets, live the life.</p>
+          <div class="game-meta">
+            <div class="game-players"><i class="fas fa-users"></i> 185M+ Players</div>
+            <div class="game-price">$29.99</div>
+          </div>
+          <button class="btn-game">Play Now</button>
+        </div>
+      </div>
+
+      <!-- Valorant -->
+      <div class="game-card val" onclick="showToast('🔫 Valorant – Opening game page...')">
+        <div class="game-thumb">
+          <div class="game-thumb-bg">🔫</div>
+          <div class="game-thumb-overlay"></div>
+          <div class="game-badge badge-new">New Season</div>
+          <div class="game-rating"><i class="fas fa-star"></i> 4.7</div>
+        </div>
+        <div class="game-info">
+          <div class="game-genre">Tactical Shooter</div>
+          <h3 class="game-title">Valorant</h3>
+          <p class="game-desc">Riot's precision 5v5 character-based tactical shooter. Master agents with unique abilities and dominate every round.</p>
+          <div class="game-meta">
+            <div class="game-players"><i class="fas fa-users"></i> 26M+ Players</div>
+            <div class="game-price price-free">FREE</div>
+          </div>
+          <button class="btn-game">Play Free</button>
+        </div>
+      </div>
+
+      <!-- Free Fire -->
+      <div class="game-card ff" onclick="showToast('🔥 Free Fire – Opening game page...')">
+        <div class="game-thumb">
+          <div class="game-thumb-bg">🔥</div>
+          <div class="game-thumb-overlay"></div>
+          <div class="game-badge badge-free">Free to Play</div>
+          <div class="game-rating"><i class="fas fa-star"></i> 4.6</div>
+        </div>
+        <div class="game-info">
+          <div class="game-genre">Battle Royale</div>
+          <h3 class="game-title">Free Fire</h3>
+          <p class="game-desc">Survive the intense 50-player battle royale on mobile and PC. Drop in, gear up, and be the last one standing.</p>
+          <div class="game-meta">
+            <div class="game-players"><i class="fas fa-users"></i> 150M+ Players</div>
+            <div class="game-price price-free">FREE</div>
+          </div>
+          <button class="btn-game">Play Free</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- ─────────────── NEWS ─────────────── -->
+<section id="news">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">📰 Breaking</div>
+      <h2 class="section-title">Gaming <span>News</span></h2>
+      <p class="section-sub">Stay ahead of the curve with the latest from the gaming universe</p>
+    </div>
+
+    <div class="news-grid">
+      <!-- Featured article -->
+      <div class="news-featured" onclick="showToast('📖 Opening full article...')">
+        <div class="news-featured-img">🌌</div>
+        <div class="news-featured-content">
+          <span class="news-tag">Exclusive</span>
+          <h3 class="news-featured-title">GTA VI Release Date Officially Confirmed by Rockstar Games</h3>
+          <p class="news-featured-excerpt">
+            Rockstar Games has finally broken the silence, officially confirming the release window for GTA VI. With a sprawling dual-protagonist narrative set across Vice City and beyond, expectations are higher than ever. Fans can expect ray-traced visuals, next-gen physics, and an open world unlike anything before.
+          </p>
+          <div class="news-meta">
+            <span><i class="fas fa-calendar-alt"></i> June 20, 2026</span>
+            <span><i class="fas fa-user"></i> Vashu Editorial</span>
+            <span><i class="fas fa-clock"></i> 5 min read</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar articles -->
+      <div class="news-sidebar">
+        <div class="news-card" onclick="showToast('📖 Opening article...')">
+          <div class="news-card-icon">⚡</div>
+          <div class="news-card-body">
+            <div class="news-card-tag">Update</div>
+            <div class="news-card-title">Valorant Episode 9 Act 2 Drops With Two New Agents</div>
+            <div class="news-card-date"><i class="fas fa-clock"></i> Jun 18, 2026</div>
+          </div>
+        </div>
+        <div class="news-card" onclick="showToast('📖 Opening article...')">
+          <div class="news-card-icon">🏆</div>
+          <div class="news-card-body">
+            <div class="news-card-tag">Esports</div>
+            <div class="news-card-title">Free Fire World Series 2026 Prize Pool Hits $2 Million</div>
+            <div class="news-card-date"><i class="fas fa-clock"></i> Jun 15, 2026</div>
+          </div>
+        </div>
+        <div class="news-card" onclick="showToast('📖 Opening article...')">
+          <div class="news-card-icon">⛏️</div>
+          <div class="news-card-body">
+            <div class="news-card-tag">Update</div>
+            <div class="news-card-title">Minecraft 1.22 Introduces Firefly Biome and New Mobs</div>
+            <div class="news-card-date"><i class="fas fa-clock"></i> Jun 12, 2026</div>
+          </div>
+        </div>
+        <div class="news-card" onclick="showToast('📖 Opening article...')">
+          <div class="news-card-icon">🎮</div>
+          <div class="news-card-body">
+            <div class="news-card-tag">Hardware</div>
+            <div class="news-card-title">NVIDIA RTX 5090 Benchmarks Leaked — Doubles Previous Gen</div>
+            <div class="news-card-date"><i class="fas fa-clock"></i> Jun 10, 2026</div>
+          </div>
+        </div>
+        <div class="news-card" onclick="showToast('📖 Opening article...')">
+          <div class="news-card-icon">🌐</div>
+          <div class="news-card-body">
+            <div class="news-card-tag">Industry</div>
+            <div class="news-card-title">Gaming Industry Surpasses $300B Revenue Mark in 2026</div>
+            <div class="news-card-date"><i class="fas fa-clock"></i> Jun 7, 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- ─────────────── REVIEWS ─────────────── -->
+<section id="reviews">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">⭐ Community</div>
+      <h2 class="section-title">Player <span>Reviews</span></h2>
+      <p class="section-sub">What our community is saying about Vashu Gaming Hub</p>
+    </div>
+
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-stars">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        </div>
+        <p class="review-text">"Vashu Gaming Hub is my go-to source for everything gaming. The reviews are honest, the news is always fresh, and the UI feels like it belongs in a AAA game itself."</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#00f5ff22,#9b00ff33);">🎮</div>
+          <div>
+            <div class="review-name">Arjun Sharma</div>
+            <div class="review-handle">@arjun_plays</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+        </div>
+        <p class="review-text">"Best gaming platform I've used in years. The game cards are slick, the news section keeps me updated, and I love the dark futuristic theme. 10/10 design!"</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#ff006e22,#ff8c0033);">🔥</div>
+          <div>
+            <div class="review-name">Priya Menon</div>
+            <div class="review-handle">@priya_gamer</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-stars">
+          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+        </div>
+        <p class="review-text">"Finally a gaming hub that actually looks like it was built for gamers. Super responsive on mobile too. The Free Fire section got me back into the game!"</p>
+        <div class="review-author">
+          <div class="review-avatar" style="background:linear-gradient(135deg,#39ff1422,#00f5ff22);">⚡</div>
+          <div>
+            <div class="review-name">Rohan Kapoor</div>
+            <div class="review-handle">@rohan_ff</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- ─────────────── CONTACT ─────────────── -->
+<section id="contact">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">📬 Reach Out</div>
+      <h2 class="section-title">Get in <span>Touch</span></h2>
+      <p class="section-sub">Have a question, suggestion, or want to collaborate? We're all ears.</p>
+    </div>
+
+    <div class="contact-wrapper">
+      <div class="contact-info">
+        <h3>Let's <span style="background:linear-gradient(90deg,var(--neon-cyan),var(--neon-pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Connect</span></h3>
+        <p>Whether you're a fellow gamer, a game developer, or a brand — we'd love to hear from you. Drop us a message anytime.</p>
+        <div class="contact-items">
+          <div class="contact-item">
+            <div class="contact-item-icon"><i class="fas fa-envelope"></i></div>
+            <div>
+              <div class="contact-item-label">Email</div>
+              <div class="contact-item-value">hello@vashugaming.hub</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon"><i class="fab fa-discord"></i></div>
+            <div>
+              <div class="contact-item-label">Discord</div>
+              <div class="contact-item-value">discord.gg/vashugaming</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-item-icon"><i class="fas fa-globe"></i></div>
+            <div>
+              <div class="contact-item-label">Website</div>
+              <div class="contact-item-value">www.vashugaming.hub</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <form class="contact-form" onsubmit="handleFormSubmit(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" class="form-control" placeholder="Your name" required />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" class="form-control" placeholder="your@email.com" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" class="form-control" placeholder="What's this about?" />
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea class="form-control" rows="5" placeholder="Tell us anything..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="align-self:flex-start;border:none;cursor:pointer;">
+          <i class="fas fa-paper-plane"></i> Send Message
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────── FOOTER ─────────────── -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="footer-logo">⚡ Vashu Gaming Hub</div>
+      <p>Your ultimate gaming destination — curated games, breaking news, and a community built for true gamers. Level up your passion every day.</p>
+      <div class="social-icons">
+        <a href="#" class="social-icon tw"  title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-icon dc"  title="Discord"><i class="fab fa-discord"></i></a>
+        <a href="#" class="social-icon yt"  title="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="#" class="social-icon tw2" title="Twitch"><i class="fab fa-twitch"></i></a>
+        <a href="#" class="social-icon ig"  title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="social-icon tk"  title="TikTok"><i class="fab fa-tiktok"></i></a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4>Navigate</h4>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#games">Games</a></li>
+        <li><a href="#news">News</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Games</h4>
+      <ul>
+        <li><a href="#games">Minecraft</a></li>
+        <li><a href="#games">GTA V</a></li>
+        <li><a href="#games">Valorant</a></li>
+        <li><a href="#games">Free Fire</a></li>
+        <li><a href="#games">View All</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Advertise</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2026 <span>Vashu Gaming Hub</span>. All rights reserved.</p>
+    <p>Made with <span style="color:var(--neon-pink)">♥</span> for gamers worldwide</p>
+  </div>
+</footer>
+
+<!-- Toast & Back-to-top -->
+<div id="toast"></div>
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">
+  <i class="fas fa-arrow-up"></i>
+</button>
+
+<!-- ─────────────── JAVASCRIPT ─────────────── -->
+<script>
+  /* ── CANVAS ANIMATED BACKGROUND ── */
+  (function () {
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [], lines = [], animId;
+
+    const COLORS = ['#00f5ff', '#9b00ff', '#ff006e', '#39ff14'];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function rand(a, b) { return a + Math.random() * (b - a); }
+
+    function initParticles() {
+      particles = [];
+      const count = Math.min(80, Math.floor(W * H / 14000));
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: rand(0, W), y: rand(0, H),
+          vx: rand(-0.25, 0.25), vy: rand(-0.25, 0.25),
+          r: rand(1, 2.5),
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          alpha: rand(0.3, 0.8)
+        });
+      }
+    }
+
+    function initLines() {
+      lines = [];
+      const count = 6;
+      for (let i = 0; i < count; i++) {
+        lines.push({
+          y: rand(0, H),
+          speed: rand(0.2, 0.6) * (Math.random() > 0.5 ? 1 : -1),
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          alpha: rand(0.03, 0.08),
+          thickness: rand(1, 2)
+        });
+      }
+    }
+
+    function drawGrid() {
+      const gap = 80;
+      ctx.strokeStyle = 'rgba(0,245,255,0.025)';
+      ctx.lineWidth = 0.5;
+      for (let x = 0; x < W; x += gap) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 0; y < H; y += gap) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+    }
+
+    function drawParticles() {
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color + Math.floor(p.alpha * 255).toString(16).padStart(2, '0');
+        ctx.fill();
+        // connections
+        particles.forEach(q => {
+          const dx = p.x - q.x, dy = p.y - q.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < 130) {
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y);
+            ctx.strokeStyle = p.color + Math.floor((1 - d / 130) * 40).toString(16).padStart(2, '0');
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        });
+      });
+    }
+
+    function drawScanLines() {
+      lines.forEach(l => {
+        const grad = ctx.createLinearGradient(0, l.y, W, l.y);
+        grad.addColorStop(0, 'transparent');
+        grad.addColorStop(0.5, l.color + Math.floor(l.alpha * 255).toString(16).padStart(2, '0'));
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, l.y - l.thickness / 2, W, l.thickness);
+        l.y += l.speed;
+        if (l.y < 0) l.y = H;
+        if (l.y > H) l.y = 0;
+      });
+    }
+
+    function drawRadialGlow() {
+      const cx = W * 0.5, cy = H * 0.4;
+      const gr = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.55);
+      gr.addColorStop(0, 'rgba(155,0,255,0.04)');
+      gr.addColorStop(0.5, 'rgba(0,245,255,0.02)');
+      gr.addColorStop(1, 'transparent');
+      ctx.fillStyle = gr;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      drawGrid();
+      drawRadialGlow();
+      drawScanLines();
+      drawParticles();
+
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+      });
+
+      animId = requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', () => { resize(); initParticles(); initLines(); });
+    resize(); initParticles(); initLines();
+    loop();
+  })();
+
+  /* ── NAVBAR SCROLL ── */
+  window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+    const btt = document.getElementById('back-to-top');
+    btt.classList.toggle('visible', window.scrollY > 400);
+  });
+
+  /* ── HAMBURGER ── */
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+
+  function closeMobileMenu() {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  }
+
+  /* ── TOAST ── */
+  let toastTimer;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  /* ── FORM SUBMIT ── */
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    showToast('✅ Message sent! We\'ll get back to you soon.');
+    e.target.reset();
+  }
+
+  /* ── COUNTER ANIMATION ── */
+  function animateCounters() {
+    document.querySelectorAll('.stat-value').forEach(el => {
+      const target = +el.dataset.target;
+      const suffix = target >= 1000 ? 'K+' : (target === 97 ? '%' : '+');
+      const displayTarget = target >= 1000 ? target / 1000 : target;
+      let current = 0;
+      const step = displayTarget / 60;
+      const timer = setInterval(() => {
+        current = Math.min(current + step, displayTarget);
+        el.textContent = (Number.isInteger(displayTarget) ? Math.floor(current) : current.toFixed(1)) + suffix;
+        if (current >= displayTarget) clearInterval(timer);
+      }, 16);
+    });
+  }
+
+  /* ── INTERSECTION OBSERVER for counters ── */
+  const heroObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      animateCounters();
+      heroObserver.disconnect();
+    }
+  }, { threshold: 0.4 });
+  heroObserver.observe(document.querySelector('.hero-stats'));
+
+  /* ── SMOOTH NAV CLICK ── */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', function (e) {
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  /* ── SCROLL REVEAL (simple) ── */
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.game-card, .news-featured, .news-card, .review-card, .contact-item').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    revealObserver.observe(el);
+  });
+</script>
+</body>
+</html>
